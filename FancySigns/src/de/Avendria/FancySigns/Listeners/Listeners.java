@@ -5,6 +5,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
+import de.Avendria.FancySigns.ConfigManager;
+
 public class Listeners implements Listener{
 
 	
@@ -14,9 +16,17 @@ public class Listeners implements Listener{
 			//Das geänderte schild ist ein FancySigns
 			Player player = event.getPlayer();
 			if (player.hasPermission("FancySigns.create")){
-				if(){
-					
+				if(ConfigManager.doServerExists(event.getLine(1))) {
+					if(ConfigManager.doTemplateExists(event.getLine(2))){
+						//Schild kann registrierd werden
+						
+						
+					}else{
+						//Template existiert nicht
+						
+					}
 				}else{
+					//Server existiert nicht
 					
 				}
 			}else{
