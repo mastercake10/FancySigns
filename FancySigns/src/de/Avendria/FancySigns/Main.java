@@ -1,8 +1,10 @@
 package de.Avendria.FancySigns;
 
+
 import java.io.File;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -14,7 +16,9 @@ public class Main extends JavaPlugin{
 	public static File data_dir;
 	public static Plugin pl;
 	public static Manager manager;
+	public static FileConfiguration cfg;
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onEnable(){
 		Main.pl = this;
@@ -24,21 +28,43 @@ public class Main extends JavaPlugin{
 		manager = new Manager();
 		manager.loadSignsFromFile();
 	
+		//Config
+		this.saveDefaultConfig();
+		cfg = this.getConfig();
 		
+		//Listener
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(new Listeners(), this);
 		
+		//Commands
+		this.getCommand("fancysigns").setExecutor(new ReloadCmd(this));
+		
+		
 	    Main.pl.getServer().getMessenger().registerOutgoingPluginChannel(Main.pl, "BungeeCord");
 	    
-		this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable(){
+		this.getServer().getScheduler().scheduleAsyncRepeatingTask(this, new Runnable(){
 			public void run(){
+				manager.updateSignInfos();
 				//Getting new server-infos
 				if(Bukkit.getOnlinePlayers().size() > 0){
 					//Only works if player is online
 					updateServerInfos();
+				
 				}
 			}
 		}, 20L, 20L);
+		this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable(){
+			public void run(){
+				manager.updateSigns();
+				//manager.updateSigns();
+			}
+		}, 20L, 20L);
+	}
+	public void reload(){
+		Bukkit.getPluginManager().disablePlugin(this);
+		Bukkit.getPluginManager().enablePlugin(this);
+		//onDisable();
+		//onEnable();
 	}
 	public static void sendPluginMessage(Player p, byte[] ar){
 		p.sendPluginMessage(Main.pl, "BungeeCord", ar);

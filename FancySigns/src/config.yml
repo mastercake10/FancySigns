@@ -1,0 +1,26 @@
+#Note: You don't need to set server IPs for this plugin. Just use the servernames configured in the bungeecord.yml
+templates:
+  info:
+    #Should players be able to join the server?
+    joinOnClick: false
+    #Defines a background of the sign, possible types: none, glass, wool, clay (color depends on motd start color)
+    background: glass
+    layout:
+      - '6c%name%'
+      - '&c%online%&a/&c%slots%'
+      - '%isonline%'
+      - ''
+    online: '&aOnline'
+    offline: '&cOffline'
+  game:
+    #Should players be able to join the server?
+    joinOnClick: true
+    #Defines a background of the sign, possible types: none, glass, wool
+    background: glass
+    layout:
+      - '&6%name%'
+      - '&c%online%&a/&c%slots%'
+      - '%isonline%'
+      - '%motd%'
+    online: '&a+++'
+    offline: '&c---'

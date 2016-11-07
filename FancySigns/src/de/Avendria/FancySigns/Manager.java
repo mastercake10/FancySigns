@@ -1,41 +1,61 @@
 package de.Avendria.FancySigns;
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class Manager {
 	//Signs
     File signs_file = new File(Main.data_dir + "/" + "signs.yml");
-    YamlConfiguration signs_cfg;
-    List<Location> sign_locs = new ArrayList<Location>();
-  
+    List<FancySign> signs = new ArrayList<FancySign>();
     //Server-Infos
     DataFetcher data;
+    
+    Gson gson;
     
     public Manager(){
     	data = new DataFetcher();
     	Main.pl.getServer().getMessenger().registerIncomingPluginChannel(Main.pl, "BungeeCord", data);
+    	gson = new Gson();
     }
     public void loadSignsFromFile(){
         if(!signs_file.exists()) return;
-        signs_cfg = YamlConfiguration.loadConfiguration(signs_file);
-        sign_locs = stringsToLocations(signs_cfg.getStringList("locs"));
-        Main.log(sign_locs.size() + " signs loaded (size: " + signs_file.length() + " bytes)");
+        String json = "";
+		try {
+			json = Files.readAllLines(signs_file.toPath(), Charset.defaultCharset()).get(0);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        Type t = new TypeToken<ArrayList<FancySign>>() {}.getType();
+        signs = gson.fromJson(json, t);
+        Main.log(signs.size() + " signs loaded (size: " + signs_file.length() + " bytes)");
     }
     public void saveSignsToFile(){
-    	signs_cfg.set("locs", locationsToString(sign_locs));
-        try {
-        	signs_cfg.save(signs_file);
+    	String json = gson.toJson(signs);
+    	try {
+			Files.write(signs_file.toPath(), json.getBytes(Charset.defaultCharset()));
 		} catch (IOException e) {
 			Main.log("Error saving signs.yml: " + e.getCause().getCause().toString());
 		}
+			
+		
         Main.log("Signs saved (size: " + signs_file.length() + " bytes)");
     }
     public List<String> locationsToString(List<Location> locs){
@@ -53,21 +73,92 @@ public class Manager {
     	}
     	return locations;
     }
-    public void addSign(Location loc){
-    	sign_locs.add(loc);
+    public void updateSignBlocks(){
+    	Iterator<FancySign> it = signs.iterator();
+    	while(it.hasNext()){
+    		FancySign fs = it.next();
+    		Location loc = fs.loc.get();
+    		if(loc.getBlock() != null){
+    			Block b = loc.getBlock();
+    			if(b.getState() instanceof Sign){
+    				fs.updateInfo();
+    			}else{
+    				it.remove();
+    			}
+    		}
+    	}
+    }
+    public void updateSignInfos(){
+    	Iterator<FancySign> it = signs.iterator();
+    	while(it.hasNext()){
+    		FancySign fs = it.next();
+    		fs.updateInfo();
+    	}
+    }
+    public FancySign getSignAt(Location loc){
+    	for(FancySign fs : signs){
+    		if(fs.loc.get().getBlockX() == loc.getBlockX() && fs.loc.get().getBlockY() == loc.getBlockY() && fs.loc.get().getBlockZ() == loc.getBlockZ()){
+    			return fs;
+    		}
+    	}
+    	return null;
+    }
+    public void updateSigns(){
+    	Iterator<FancySign> it = signs.iterator();
+    	while(it.hasNext()){
+    		FancySign fs = it.next();
+    		Location loc = fs.loc.get();
+    		if(loc.getBlock() != null){
+    			Block b = loc.getBlock();
+    			if(b.getState() instanceof Sign){
+    				fs.update();
+    			}else{
+    				it.remove();
+    			}
+    		}
+    	}
+    }
+    public boolean isSignAt(Location loc){
+    	for(FancySign fs : signs){
+    		Location loc2 = fs.loc.get();
+    		if(loc.getBlockX() == loc2.getBlockX() && loc.getBlockY() == loc2.getBlockY() && loc.getBlockZ() == loc2.getBlockZ()){
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    public void addSign(FancySign fs){
+    	signs.add(fs);
     }
     public void removeSign(Location loc){
-    	Location toRem = null;
-    	for(Location loc2 : sign_locs){
+    	FancySign toRem = null;
+    	for(FancySign fs : signs){
+    		Location loc2 = fs.loc.get();
     		if(loc2.getBlockX() == loc.getBlockX() && loc2.getBlockY() == loc.getBlockY() && loc2.getBlockZ() == loc.getBlockZ()){
-    			toRem = loc2;
+    			toRem = fs;
     			break;
     		}
     	}
     	if(toRem == null){
     		return;
     	}
-    	sign_locs.remove(toRem);
+    	signs.remove(toRem);
     }
-    
+    //Server managing
+    public Server getServerFromName(String name){
+    	for(Server s : data.fetchedServers){
+    		if(s.name.equals(name)) return s;
+    	}
+    	return null;
+    }
+    public boolean serverExist(String name){
+    	for(Server s : data.fetchedServers){
+    		if(s.name.equals(name)) return true;
+    	}
+    	return false;
+    }
+    public List<Server> getServers(){
+    	return data.fetchedServers;
+    }
+    //Template managing
 }
