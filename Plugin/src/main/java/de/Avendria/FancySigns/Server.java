@@ -6,6 +6,7 @@ public class Server {
 		this.ip = ip2;
 		this.port = port2;
 	}
+	
 	public String name;
 	public String ip;
 	public short port;

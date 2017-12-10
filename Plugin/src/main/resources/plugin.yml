@@ -1,0 +1,12 @@
+name: FancySigns
+version: ${project.parent.version}
+description: A Bungeecord Teleport Signe Plugin.
+authors: [Bananenstrudel, Linus122]
+website: Avendria.de
+main: de.Avendria.FancySigns.Main
+commands:
+   fancysigns:
+     aliases: [fs]
+     description: Reloads the plugin
+     permission: fancysigns.use
+     usage: /fs

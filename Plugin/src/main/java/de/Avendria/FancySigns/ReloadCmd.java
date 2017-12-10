@@ -6,13 +6,14 @@ import org.bukkit.command.CommandSender;
 
 public class ReloadCmd implements CommandExecutor {
 	Main clasz;
+	
 	public ReloadCmd(Main main) {
 		clasz = main;
 	}
-
+	
 	@Override
 	public boolean onCommand(CommandSender cs, Command arg1, String arg2, String[] arg3) {
-		if(!cs.hasPermission("fancysigns.use")){
+		if (!cs.hasPermission("fancysigns.use")) {
 			cs.sendMessage("§cYou dont have permissions!");
 			return true;
 		}
@@ -20,5 +21,5 @@ public class ReloadCmd implements CommandExecutor {
 		cs.sendMessage("§cPlugin reloaded!");
 		return true;
 	}
-
+	
 }
