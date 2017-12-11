@@ -11,7 +11,7 @@ public class SLLocation {
 	float yaw;
 	String w;
 	
-	public SLLocation(Location loc){
+	public SLLocation(Location loc) {
 		x = loc.getX();
 		y = loc.getY();
 		z = loc.getZ();
@@ -19,7 +19,8 @@ public class SLLocation {
 		yaw = loc.getYaw();
 		w = loc.getWorld().getName();
 	}
-	public Location get(){
+	
+	public Location get() {
 		Location loc = new Location(Bukkit.getWorld(w), x, y, z);
 		loc.setPitch(pitch);
 		loc.setYaw(yaw);
